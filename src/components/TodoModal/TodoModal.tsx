@@ -3,6 +3,7 @@ import { Loader } from '../Loader';
 import { User } from '../../types/User';
 import { Todo } from '../../types/Todo';
 import { getUser } from '../../api';
+import classNames from 'classnames';
 
 type Props = {
   todos: Todo[];
@@ -18,13 +19,9 @@ export const TodoModal = ({ selectedId, onSelectedId, todos }: Props) => {
 
   useEffect(() => {
     if (currTodo?.userId) {
-      getUser(currTodo?.userId).then((u: User) => setUser(u));
-    }
-
-    if (loader) {
-      window.setTimeout(() => {
-        setLoader(false);
-      }, 300);
+      getUser(currTodo?.userId)
+        .then((u: User) => setUser(u))
+        .finally(() => setLoader(false));
     }
   }, [selectedId, loader, currTodo?.userId]);
 
@@ -63,9 +60,10 @@ export const TodoModal = ({ selectedId, onSelectedId, todos }: Props) => {
               <p className="block" data-cy="modal-user">
                 {/* <strong className="has-text-success">Done</strong> */}
                 <strong
-                  className={
-                    currTodo.completed ? 'has-text-success' : 'has-text-danger'
-                  }
+                  className={classNames({
+                    'has-text-success': currTodo.completed,
+                    'has-text-danger': !currTodo.completed,
+                  })}
                 >
                   {currTodo.completed ? 'Done' : 'Planned'}
                 </strong>

@@ -1,48 +1,43 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Todo } from '../../types/Todo';
+import classNames from 'classnames';
 
 type Props = {
   todos: Todo[];
   query: string;
   filter: string;
-  onListLoader: (l: boolean) => void;
   listLoader: boolean;
   selectedId: number | null;
   onSelectedId: (id: number) => void;
 };
 
-export const TodoList = ({
+export const TodoList: React.FC<Props> = ({
   todos,
   query,
   filter,
-  onListLoader,
   listLoader,
   selectedId,
   onSelectedId,
-}: Props) => {
+}) => {
   const [isFirstLoading, setIsFirstLoading] = useState<boolean>(true);
-  const [currTodos, setTodos] = useState<Todo[]>(todos);
+
+  const visibleGoods = useMemo(() => {
+    return todos.filter(todo => {
+      if (todo.completed && filter === 'active') {
+        return false;
+      } else if (!todo.completed && filter === 'completed') {
+        return false;
+      }
+
+      return todo.title.toLowerCase().includes(query);
+    });
+  }, [todos, query, filter]);
 
   useEffect(() => {
     if (isFirstLoading) {
-      setTimeout(() => {
-        setIsFirstLoading(false);
-        onListLoader(false);
-      }, 300);
+      setIsFirstLoading(false);
     }
-
-    setTodos(
-      todos.filter(todo => {
-        if (todo.completed && filter === 'active') {
-          return false;
-        } else if (!todo.completed && filter === 'completed') {
-          return false;
-        }
-
-        return todo.title.includes(query);
-      }),
-    );
-  }, [todos, selectedId, query, filter, isFirstLoading, onListLoader]);
+  }, [todos, selectedId, query, filter, isFirstLoading]);
 
   return (
     <>
@@ -62,7 +57,7 @@ export const TodoList = ({
           </thead>
 
           <tbody>
-            {currTodos.map(todo => (
+            {visibleGoods.map(todo => (
               <tr data-cy="todo" className="" key={todo.id}>
                 <td className="is-vcentered">{todo.id}</td>
                 <td className="is-vcentered">
@@ -74,9 +69,10 @@ export const TodoList = ({
                 </td>
                 <td className="is-vcentered is-expanded">
                   <p
-                    className={
-                      todo.completed ? 'has-text-success' : 'has-text-danger'
-                    }
+                    className={classNames({
+                      'has-text-success': todo.completed,
+                      'has-text-danger': !todo.completed,
+                    })}
                   >
                     {todo.title}
                   </p>
@@ -89,7 +85,11 @@ export const TodoList = ({
                   >
                     <span className="icon">
                       <i
-                        className={`far ${selectedId === todo.id ? 'fa-eye-slash' : 'fa-eye'}`}
+                        className={classNames({
+                          far: true,
+                          'fa-eye-slash': selectedId === todo.id,
+                          'fa-eye': selectedId !== todo.id,
+                        })}
                         onClick={() => {
                           onSelectedId(todo.id);
                         }}

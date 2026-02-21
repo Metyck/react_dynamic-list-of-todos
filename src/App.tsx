@@ -12,16 +12,18 @@ import { getTodos } from './api';
 
 export const App: React.FC = () => {
   const [listLoader, setListLoader] = useState<boolean>(true);
-  const [query, setQuerry] = useState<string>('');
+  const [query, setQuery] = useState<string>('');
   const [appliedQuerry, setAppliedQuerry] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<string>('');
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [todos, setTodos] = useState<Todo[]>([]);
 
   useEffect(() => {
-    getTodos().then(todosFromServer => {
-      setTodos(todosFromServer);
-    });
+    getTodos()
+      .then(todosFromServer => {
+        setTodos(todosFromServer);
+      })
+      .finally(() => setListLoader(false));
   }, []);
 
   return (
@@ -35,7 +37,7 @@ export const App: React.FC = () => {
               <TodoFilter
                 query={query}
                 onQueryChange={newQuery => {
-                  setQuerry(newQuery);
+                  setQuery(newQuery);
                 }}
                 filter={selectedFilter}
                 onFilterChange={newFilter => setSelectedFilter(newFilter)}
@@ -50,9 +52,6 @@ export const App: React.FC = () => {
                 query={appliedQuerry}
                 filter={selectedFilter}
                 listLoader={listLoader}
-                onListLoader={newVal => {
-                  setListLoader(newVal);
-                }}
                 selectedId={selectedId}
                 onSelectedId={newId => {
                   setSelectedId(newId);
