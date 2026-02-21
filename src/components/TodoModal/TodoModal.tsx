@@ -23,7 +23,7 @@ export const TodoModal = ({ selectedId, onSelectedId, todos }: Props) => {
         .then((u: User) => setUser(u))
         .finally(() => setLoader(false));
     }
-  }, [selectedId, loader, currTodo?.userId]);
+  }, [selectedId, currTodo?.userId]);
 
   return (
     <div className="modal is-active" data-cy="modal">
